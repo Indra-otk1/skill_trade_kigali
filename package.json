@@ -1,0 +1,30 @@
+{
+  "name": "skill_trade_kigali",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+  "start": "node src/server.js",
+  "dev": "nodemon src/server.js"
+},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Indra-otk1/skill_trade_kigali.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Indra-otk1/skill_trade_kigali/issues"
+  },
+  "homepage": "https://github.com/Indra-otk1/skill_trade_kigali#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.10",
+    "express": "^5.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
