@@ -14,6 +14,7 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', app: 'SkillTrade Kigali' });
 });
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/skills', require('./routes/skills'));
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`SkillTrade Kigali running on http://localhost:${PORT}`);
