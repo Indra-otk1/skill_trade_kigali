@@ -90,7 +90,11 @@ function renderTrade(t) {
   }
 
   if (t.status === 'completed') {
-    actions.append(ratingForm(t, partner));
+    actions.append(
+      t.rated_by_me
+        ? el('span', { class: 'muted' }, 'You rated this trade.')
+        : ratingForm(t, partner)
+    );
   }
 
   return el(
