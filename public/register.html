@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register | SkillTrade Kigali</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header id="nav"></header>
+
+  <main>
+    <div class="card form-card">
+      <h2>Create your account</h2>
+      <div id="form-message" class="message" hidden></div>
+      <div id="dev-link"></div>
+
+      <form id="register-form">
+        <label>Name <input id="reg-name" type="text" required></label>
+        <label>Email <input id="reg-email" type="email" required></label>
+        <label>Password (8+ characters) <input id="reg-password" type="password" minlength="8" required></label>
+        <button class="btn" type="submit">Register</button>
+      </form>
+      <p class="muted">Already have an account? <a href="/login.html">Log in</a></p>
+    </div>
+  </main>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/auth.js"></script>
+</body>
+</html>
