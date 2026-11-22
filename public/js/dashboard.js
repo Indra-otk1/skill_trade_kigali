@@ -57,7 +57,81 @@ async function tradeAction(id, action) {
     showMessage('page-message', err.message);
   }
 }
+function formatTime(value) {
+  // SQLite stores UTC like "2026-11-15 10:30:00"
+  const date = new Date(value.replace(' ', 'T') + 'Z');
+  return date.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
 
+function messagePanel(t) {
+  const list = el('div', { class: 'messages' });
+  const input = el('input', { type: 'text', placeholder: 'Write a message...', maxlength: '1000' });
+  const status = el('span', { class: 'muted' });
+  let loaded = false;
+
+  async function loadMessages() {
+    try {
+      const { messages } = await api(`/trades/${t.id}/messages`);
+      list.replaceChildren(
+        ...(messages.length
+          ? messages.map((m) =>
+              el(
+                'div',
+                { class: `bubble${m.sender_id === currentUser.id ? ' mine' : ''}` },
+                m.body,
+                el('small', {}, `${m.sender_name} · ${formatTime(m.created_at)}`)
+              )
+            )
+          : [el('p', { class: 'muted' }, 'No messages yet. Say hello and agree on when and where to meet.')])
+      );
+      list.scrollTop = list.scrollHeight;
+      status.textContent = '';
+    } catch (err) {
+      status.textContent = err.message;
+    }
+  }
+
+  const form = el(
+    'form',
+    {
+      class: 'message-form',
+      onsubmit: async (e) => {
+        e.preventDefault();
+        if (!input.value.trim()) return;
+        try {
+          await api(`/trades/${t.id}/messages`, { method: 'POST', body: { body: input.value } });
+          input.value = '';
+          await loadMessages();
+        } catch (err) {
+          status.textContent = err.message;
+        }
+      },
+    },
+    input,
+    el('button', { class: 'btn', type: 'submit' }, 'Send'),
+    el('button', { class: 'btn secondary', type: 'button', onclick: loadMessages }, 'Refresh')
+  );
+
+  const panel = el('div', { class: 'message-panel', hidden: '' }, list, form, status);
+
+  const toggle = el(
+    'button',
+    {
+      class: 'btn secondary',
+      type: 'button',
+      onclick: () => {
+        panel.hidden = !panel.hidden;
+        if (!panel.hidden && !loaded) {
+          loaded = true;
+          loadMessages();
+        }
+      },
+    },
+    'Messages'
+  );
+
+  return el('div', { class: 'rating-form' }, toggle, panel);
+}
 function renderTrade(t) {
   const myId = currentUser.id;
   const isRequester = t.requester_id === myId;
@@ -97,7 +171,7 @@ function renderTrade(t) {
         : ratingForm(t, partner)
     );
   }
-
+  const messages = t.status === 'accepted' || t.status === 'completed' ? messagePanel(t) : null;
     return el(
     'article',
     { class: 'card' },
@@ -109,8 +183,12 @@ function renderTrade(t) {
     ),
     el('p', {}, `You give: ${iGive}`),
     el('p', {}, `You get: ${iGet}`),
-    actions
+    actions,
+        el('p', {}, `You get: ${iGet}`),
+    actions,
+    messages
   );
+  
 }
 
 function ratingForm(t, partner) {

@@ -52,6 +52,15 @@ db.exec(`
     FOREIGN KEY (rater_id) REFERENCES "user"(id),
     FOREIGN KEY (ratee_id) REFERENCES "user"(id)
   );
+    CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    trade_id INTEGER NOT NULL,
+    sender_id TEXT NOT NULL,
+    body TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (trade_id) REFERENCES trades(id),
+    FOREIGN KEY (sender_id) REFERENCES "user"(id)
+  );
 `);
 
 export default db;
