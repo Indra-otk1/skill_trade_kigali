@@ -1,7 +1,6 @@
-const express = require('express');
-const db = require('../db/database');
-const requireAuth = require('../middleware/auth');
-
+import express from 'express';
+import db from '../db/database.js';
+import requireAuth from '../middleware/auth.js';
 const router = express.Router();
 
 // Every trade route requires a logged-in user
@@ -15,8 +14,8 @@ const TRADE_SELECT = `
     t.requested_skill_id, rs.title AS requested_skill_title,
     t.offered_skill_id, os.title AS offered_skill_title
   FROM trades t
-  JOIN users ru ON ru.id = t.requester_id
-  JOIN users pu ON pu.id = t.provider_id
+  JOIN "user" ru ON ru.id = t.requester_id
+  JOIN "user" pu ON pu.id = t.provider_id
   JOIN skills rs ON rs.id = t.requested_skill_id
   JOIN skills os ON os.id = t.offered_skill_id
 `;
@@ -158,4 +157,4 @@ router.patch('/:id/confirm', (req, res) => {
   res.json({ trade: getTrade(trade.id) });
 });
 
-module.exports = router;
+export default router;

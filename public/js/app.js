@@ -1,58 +1,56 @@
 const API = '/api';
 
-function getToken() {
-  return localStorage.getItem('token');
-}
+let currentUser = null;
+let sessionPromise = null;
 
-function getUser() {
-  try {
-    return JSON.parse(localStorage.getItem('user'));
-  } catch (e) {
-    return null;
+// Asks the server who is logged in (cookie-based session); cached per page load
+function loadSession() {
+  if (!sessionPromise) {
+    sessionPromise = fetch('/api/auth/get-session')
+      .then((res) => res.json().catch(() => null))
+      .then((data) => {
+        currentUser = data && data.user ? data.user : null;
+        return currentUser;
+      })
+      .catch(() => null);
   }
+  return sessionPromise;
 }
 
-function saveSession(token, user) {
-  localStorage.setItem('token', token);
-  localStorage.setItem('user', JSON.stringify(user));
-}
-
-function clearSession() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-}
-
-function logout() {
-  clearSession();
+async function logout() {
+  try {
+    await fetch('/api/auth/sign-out', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}',
+    });
+  } catch (e) {
+    // ignore: we redirect anyway
+  }
   window.location.href = '/';
 }
 
-// Wrapper around fetch: adds the JWT, parses JSON, throws readable errors
+// Wrapper around fetch: parses JSON and throws readable errors.
+// Our routes return { error }, Better Auth returns { message }.
 async function api(path, { method = 'GET', body } = {}) {
-  const headers = { 'Content-Type': 'application/json' };
-  const token = getToken();
-  if (token) headers.Authorization = `Bearer ${token}`;
-
   const res = await fetch(API + path, {
     method,
-    headers,
+    headers: { 'Content-Type': 'application/json' },
     body: body ? JSON.stringify(body) : undefined,
   });
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    // Expired or invalid token: log out and go to the login page
-    if (res.status === 401 && token && !window.location.pathname.endsWith('login.html')) {
-      clearSession();
+    if (res.status === 401 && !window.location.pathname.endsWith('login.html')) {
       window.location.href = '/login.html';
     }
-    throw new Error(data.error || 'Something went wrong');
+    throw new Error(data.error || data.message || 'Something went wrong');
   }
   return data;
 }
 
-// Small helper to build DOM elements. Text is added as text nodes, never as HTML,
-// so user-provided content cannot inject scripts.
+// Builds DOM elements. Text is added as text nodes, never HTML, so
+// user-provided content cannot inject scripts.
 function el(tag, props = {}, ...children) {
   const node = document.createElement(tag);
   for (const [key, value] of Object.entries(props)) {
@@ -79,11 +77,11 @@ function formatRating(average, count) {
   return count ? `★ ${average} (${count})` : 'No ratings yet';
 }
 
-function renderNav() {
+async function renderNav() {
   const nav = document.getElementById('nav');
   if (!nav) return;
 
-  const user = getUser();
+  const user = await loadSession();
   const links = [el('a', { href: '/' }, 'Browse skills')];
 
   if (user) {

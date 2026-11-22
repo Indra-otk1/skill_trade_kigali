@@ -1,4 +1,4 @@
-const currentUser = getUser();
+
 const skillsBox = document.getElementById('skills');
 const searchInput = document.getElementById('search');
 const categorySelect = document.getElementById('category');
@@ -92,5 +92,7 @@ document.getElementById('filters').addEventListener('submit', (e) => {
 });
 categorySelect.addEventListener('change', loadSkills);
 
-loadCategories();
-loadSkills();
+loadSession().then(() => {
+  loadCategories();
+  loadSkills();
+});

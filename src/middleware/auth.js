@@ -1,20 +1,17 @@
-const jwt = require('jsonwebtoken');
+import { fromNodeHeaders } from 'better-auth/node';
+import { auth } from '../auth.js';
 
-function requireAuth(req, res, next) {
-  const header = req.headers.authorization || '';
-  const token = header.startsWith('Bearer ') ? header.slice(7) : null;
-
-  if (!token) {
-    return res.status(401).json({ error: 'Authentication required' });
-  }
-
+export default async function requireAuth(req, res, next) {
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = { id: payload.id, email: payload.email };
+    const session = await auth.api.getSession({
+      headers: fromNodeHeaders(req.headers),
+    });
+    if (!session) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    req.user = { id: session.user.id, email: session.user.email, name: session.user.name };
     next();
   } catch (err) {
-    return res.status(401).json({ error: 'Invalid or expired token' });
+    next(err);
   }
 }
-
-module.exports = requireAuth;

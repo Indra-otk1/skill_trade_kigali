@@ -1,6 +1,6 @@
-const express = require('express');
-const db = require('../db/database');
-const requireAuth = require('../middleware/auth');
+import express from 'express';
+import db from '../db/database.js';
+import requireAuth from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -57,7 +57,7 @@ router.post('/', requireAuth, (req, res) => {
 
 // GET /api/ratings/user/:id  (public: a user's reviews and average)
 router.get('/user/:id', (req, res) => {
-  const user = db.prepare('SELECT id, name FROM users WHERE id = ?').get(req.params.id);
+  const user = db.prepare('SELECT id, name FROM "user" WHERE id = ?').get(req.params.id);
   if (!user) {
     return res.status(404).json({ error: 'User not found' });
   }
@@ -72,7 +72,7 @@ router.get('/user/:id', (req, res) => {
     .prepare(
       `SELECT r.id, r.score, r.comment, r.created_at, u.name AS rater_name
        FROM ratings r
-       JOIN users u ON u.id = r.rater_id
+       JOIN "user" u ON u.id = r.rater_id
        WHERE r.ratee_id = ?
        ORDER BY r.created_at DESC`
     )
@@ -81,4 +81,4 @@ router.get('/user/:id', (req, res) => {
   res.json({ user, average: summary.average, count: summary.count, reviews });
 });
 
-module.exports = router;
+export default router;
