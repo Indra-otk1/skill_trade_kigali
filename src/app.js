@@ -7,6 +7,7 @@ import { auth } from './auth.js';
 import skillsRouter from './routes/skills.js';
 import tradesRouter from './routes/trades.js';
 import ratingsRouter from './routes/ratings.js';
+import usersRouter from './routes/users.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -30,6 +31,7 @@ app.get('/api/health', (req, res) => {
 app.use('/api/skills', skillsRouter);
 app.use('/api/trades', tradesRouter);
 app.use('/api/ratings', ratingsRouter);
+app.use('/api/users', usersRouter);
 
 app.use('/api', (req, res) => {
   res.status(404).json({ error: 'Route not found' });

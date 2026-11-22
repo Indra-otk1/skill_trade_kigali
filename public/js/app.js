@@ -86,6 +86,7 @@ async function renderNav() {
 
   if (user) {
     links.push(el('a', { href: '/dashboard.html' }, 'My dashboard'));
+    links.push(el('a', { href: `/profile.html?id=${encodeURIComponent(user.id)}` }, 'My profile'));
     links.push(el('span', { class: 'nav-user' }, `Hi, ${user.name}`));
     links.push(el('button', { class: 'link-btn', onclick: logout }, 'Log out'));
   } else {
