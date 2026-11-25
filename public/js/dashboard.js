@@ -62,6 +62,7 @@ function renderTrade(t) {
   const myId = currentUser.id;
   const isRequester = t.requester_id === myId;
   const partner = isRequester ? t.provider_name : t.requester_name;
+  const partnerId = isRequester ? t.provider_id : t.requester_id;
   const iGive = isRequester ? t.offered_skill_title : t.requested_skill_title;
   const iGet = isRequester ? t.requested_skill_title : t.offered_skill_title;
   const myConfirmed = isRequester ? t.requester_confirmed : t.provider_confirmed;
@@ -97,10 +98,15 @@ function renderTrade(t) {
     );
   }
 
-  return el(
+    return el(
     'article',
     { class: 'card' },
-    el('div', { class: 'card-top' }, el('h3', {}, `Trade with ${partner}`), el('span', { class: `badge ${t.status}` }, t.status)),
+    el(
+      'div',
+      { class: 'card-top' },
+      el('h3', {}, 'Trade with ', el('a', { class: 'owner-link', href: `/profile.html?id=${encodeURIComponent(partnerId)}` }, partner)),
+      el('span', { class: `badge ${t.status}` }, t.status)
+    ),
     el('p', {}, `You give: ${iGive}`),
     el('p', {}, `You get: ${iGet}`),
     actions
@@ -152,7 +158,7 @@ document.getElementById('skill-form').addEventListener('submit', async (e) => {
     await loadMySkills();
   } catch (err) {
     showMessage('page-message', err.message);
-  }
+  }L
 });
 
 loadSession().then((user) => {

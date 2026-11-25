@@ -47,8 +47,12 @@ function renderSkillCard(skill) {
     { class: 'card' },
     el('div', { class: 'card-top' }, el('h3', {}, skill.title), el('span', { class: 'badge' }, skill.category)),
     el('p', {}, skill.description),
-    el('p', { class: 'meta' }, `${skill.owner_name} · ${formatRating(skill.owner_rating, skill.owner_rating_count)}`),
-    action
+    el(
+      'p',
+      { class: 'meta' },
+      el('a', { class: 'owner-link', href: `/profile.html?id=${encodeURIComponent(skill.owner_id)}` }, skill.owner_name),
+      ` · ${formatRating(skill.owner_rating, skill.owner_rating_count)}`
+    ),    action
   );
 }
 
