@@ -171,10 +171,11 @@ function renderTrade(t) {
         : ratingForm(t, partner)
     );
   }
-  const messages = t.status === 'accepted' || t.status === 'completed' ? messagePanel(t) : null;
-    return el(
+   const messages = t.status === 'accepted' || t.status === 'completed' ? messagePanel(t) : null;
+
+  return el(
     'article',
-    { class: 'card' },
+    { class: 'card trade', 'data-status': t.status },
     el(
       'div',
       { class: 'card-top' },
@@ -184,11 +185,8 @@ function renderTrade(t) {
     el('p', {}, `You give: ${iGive}`),
     el('p', {}, `You get: ${iGet}`),
     actions,
-        el('p', {}, `You get: ${iGet}`),
-    actions,
     messages
   );
-  
 }
 
 function ratingForm(t, partner) {

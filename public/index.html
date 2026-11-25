@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SkillTrade Kigali</title>
+  <title>SkillTrade Kgl</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -21,6 +21,53 @@
       <button class="btn" type="submit">Search</button>
     </form>
 
+    <section id="skills"></section>
+  </main>
+
+  <dialog id="trade-dialog">
+    <form id="trade-form">
+      <h3>Request a trade</h3>
+      <p id="trade-target"></p>
+      <label>Offer one of your skills in return
+        <select id="offer-select"></select>
+      </label>
+      <p id="trade-error" class="message error" hidden></p>
+      <div class="dialog-buttons">
+        <button type="button" id="trade-cancel" class="btn secondary">Cancel</button>
+        <button type="submit" class="btn">Send request</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="/js/app.js"></script>
+  <script src="/js/browse.js"></script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkillTrade Kigali</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header id="nav"></header>
+
+  <section class="hero">
+    <div class="hero-inner">
+      <h1>Swap skills with people in Kigali.</h1>
+      <p>Teach what you know, learn what you don't. Every trade is confirmed by both people and rated afterwards, so you know who you're dealing with.</p>
+      <form id="filters" class="filters">
+        <input id="search" type="search" placeholder="Search skills, e.g. guitar, Python, French" aria-label="Search skills">
+        <select id="category" aria-label="Category"><option value="">All categories</option></select>
+        <button class="btn" type="submit">Search</button>
+      </form>
+    </div>
+  </section>
+
+  <main>
+    <div id="page-message" class="message" hidden></div>
+    <h2>Skills on offer</h2>
     <section id="skills"></section>
   </main>
 

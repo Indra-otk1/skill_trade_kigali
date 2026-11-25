@@ -35,7 +35,7 @@ function renderSkills(skills) {
 function renderSkillCard(skill) {
   let action;
   if (!currentUser) {
-    action = el('a', { href: '/login.html' }, 'Log in to request a trade');
+    action = el('a', { class: 'btn secondary', href: '/login.html' }, 'Log in to request a trade');
   } else if (skill.owner_id === currentUser.id) {
     action = el('span', { class: 'muted' }, 'This is your skill');
   } else {
@@ -44,15 +44,16 @@ function renderSkillCard(skill) {
 
   return el(
     'article',
-    { class: 'card' },
+    { class: 'card skill', 'data-category': skill.category },
     el('div', { class: 'card-top' }, el('h3', {}, skill.title), el('span', { class: 'badge' }, skill.category)),
-    el('p', {}, skill.description),
+    el('p', { class: 'skill-desc' }, skill.description),
     el(
-      'p',
-      { class: 'meta' },
+      'div',
+      { class: 'skill-owner' },
       el('a', { class: 'owner-link', href: `/profile.html?id=${encodeURIComponent(skill.owner_id)}` }, skill.owner_name),
-      ` · ${formatRating(skill.owner_rating, skill.owner_rating_count)}`
-    ),    action
+      el('span', { class: 'rating-chip' }, formatRating(skill.owner_rating, skill.owner_rating_count))
+    ),
+    action
   );
 }
 
