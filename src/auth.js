@@ -1,27 +1,39 @@
 import 'dotenv/config';
 import { betterAuth } from 'better-auth';
-import nodemailer from 'nodemailer';
 import db from './db/database.js';
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
-});
+// Set to true while seeding demo accounts so no emails are sent for them
+export const emailControl = { suppress: false };
 
-// If no email credentials are set, print the email to the console instead
+// Sends through Brevo's HTTPS API. Without credentials, the email is printed
+// to the server console instead (handy for local development).
 async function sendEmail({ to, subject, text, html }) {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+  if (emailControl.suppress) return;
+
+  if (!process.env.BREVO_API_KEY || !process.env.EMAIL_FROM) {
     console.log(`\n[DEV EMAIL] To: ${to}\nSubject: ${subject}\n${text}\n`);
     return;
   }
+
   try {
-    await transporter.sendMail({
-      from: `"SkillTrade Kigali" <${process.env.EMAIL_USER}>`,
-      to,
-      subject,
-      text,
-      html,
+    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json',
+        accept: 'application/json',
+      },
+      body: JSON.stringify({
+        sender: { name: 'SkillTrade Kigali', email: process.env.EMAIL_FROM },
+        to: [{ email: to }],
+        subject,
+        textContent: text,
+        htmlContent: html,
+      }),
     });
+    if (!res.ok) {
+      console.error('Email provider error:', res.status, await res.text());
+    }
   } catch (err) {
     console.error('Failed to send email:', err.message);
   }
