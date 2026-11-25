@@ -156,5 +156,65 @@ router.patch('/:id/confirm', (req, res) => {
 
   res.json({ trade: getTrade(trade.id) });
 });
+// ---------- Messages (inside a trade) ----------
 
+const MESSAGE_SELECT = `
+  SELECT m.id, m.body, m.created_at, m.sender_id, u.name AS sender_name
+  FROM messages m
+  JOIN "user" u ON u.id = m.sender_id
+`;
+
+// Returns the trade if the user may use its message thread, otherwise sends the error
+function getMessagingTrade(req, res) {
+  const trade = db
+    .prepare('SELECT id, status, requester_id, provider_id FROM trades WHERE id = ?')
+    .get(req.params.id);
+
+  if (!trade) {
+    res.status(404).json({ error: 'Trade not found' });
+    return null;
+  }
+  if (trade.requester_id !== req.user.id && trade.provider_id !== req.user.id) {
+    res.status(403).json({ error: 'You are not part of this trade' });
+    return null;
+  }
+  if (trade.status !== 'accepted' && trade.status !== 'completed') {
+    res.status(409).json({ error: 'Messaging opens once the trade is accepted' });
+    return null;
+  }
+  return trade;
+}
+
+// GET /api/trades/:id/messages
+router.get('/:id/messages', (req, res) => {
+  const trade = getMessagingTrade(req, res);
+  if (!trade) return;
+
+  const messages = db
+    .prepare(`${MESSAGE_SELECT} WHERE m.trade_id = ? ORDER BY m.id ASC`)
+    .all(trade.id);
+
+  res.json({ messages });
+});
+
+// POST /api/trades/:id/messages   Body: { body }
+router.post('/:id/messages', (req, res) => {
+  const trade = getMessagingTrade(req, res);
+  if (!trade) return;
+
+  const body = typeof req.body.body === 'string' ? req.body.body.trim() : '';
+  if (!body) {
+    return res.status(400).json({ error: 'Message cannot be empty' });
+  }
+  if (body.length > 1000) {
+    return res.status(400).json({ error: 'Message must be 1000 characters or fewer' });
+  }
+
+  const result = db
+    .prepare('INSERT INTO messages (trade_id, sender_id, body) VALUES (?, ?, ?)')
+    .run(trade.id, req.user.id, body);
+
+  const message = db.prepare(`${MESSAGE_SELECT} WHERE m.id = ?`).get(result.lastInsertRowid);
+  res.status(201).json({ message });
+});
 export default router;
