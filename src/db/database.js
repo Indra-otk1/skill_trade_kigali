@@ -1,36 +1,31 @@
-const Database = require('better-sqlite3');
-const path = require('path');
+import Database from 'better-sqlite3';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const dbPath = process.env.DB_PATH || path.join(__dirname, '..', '..', 'skilltrade.sqlite');const db = new Database(dbPath);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const dbPath = process.env.DB_PATH || path.join(__dirname, '..', '..', 'skilltrade.sqlite');
+const db = new Database(dbPath);
 
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
+// Better Auth creates and manages the "user", "session", "account" and
+// "verification" tables. Our tables reference "user"(id), which is TEXT.
 db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    email TEXT NOT NULL UNIQUE,
-    password_hash TEXT NOT NULL,
-    email_verified INTEGER NOT NULL DEFAULT 0,
-    verification_token TEXT,
-    created_at TEXT NOT NULL DEFAULT (datetime('now'))
-  );
-
   CREATE TABLE IF NOT EXISTS skills (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
+    user_id TEXT NOT NULL,
     title TEXT NOT NULL,
     description TEXT NOT NULL,
     category TEXT NOT NULL,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE
   );
 
   CREATE TABLE IF NOT EXISTS trades (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    requester_id INTEGER NOT NULL,
-    provider_id INTEGER NOT NULL,
+    requester_id TEXT NOT NULL,
+    provider_id TEXT NOT NULL,
     requested_skill_id INTEGER NOT NULL,
     offered_skill_id INTEGER NOT NULL,
     status TEXT NOT NULL DEFAULT 'pending'
@@ -38,8 +33,8 @@ db.exec(`
     requester_confirmed INTEGER NOT NULL DEFAULT 0,
     provider_confirmed INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
-    FOREIGN KEY (requester_id) REFERENCES users(id),
-    FOREIGN KEY (provider_id) REFERENCES users(id),
+    FOREIGN KEY (requester_id) REFERENCES "user"(id),
+    FOREIGN KEY (provider_id) REFERENCES "user"(id),
     FOREIGN KEY (requested_skill_id) REFERENCES skills(id),
     FOREIGN KEY (offered_skill_id) REFERENCES skills(id)
   );
@@ -47,16 +42,16 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS ratings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     trade_id INTEGER NOT NULL,
-    rater_id INTEGER NOT NULL,
-    ratee_id INTEGER NOT NULL,
+    rater_id TEXT NOT NULL,
+    ratee_id TEXT NOT NULL,
     score INTEGER NOT NULL CHECK (score BETWEEN 1 AND 5),
     comment TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     UNIQUE (trade_id, rater_id),
     FOREIGN KEY (trade_id) REFERENCES trades(id),
-    FOREIGN KEY (rater_id) REFERENCES users(id),
-    FOREIGN KEY (ratee_id) REFERENCES users(id)
+    FOREIGN KEY (rater_id) REFERENCES "user"(id),
+    FOREIGN KEY (ratee_id) REFERENCES "user"(id)
   );
 `);
 
-module.exports = db;
+export default db;

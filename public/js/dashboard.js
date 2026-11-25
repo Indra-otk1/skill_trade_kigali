@@ -59,7 +59,7 @@ async function tradeAction(id, action) {
 }
 
 function renderTrade(t) {
-  const myId = getUser().id;
+  const myId = currentUser.id;
   const isRequester = t.requester_id === myId;
   const partner = isRequester ? t.provider_name : t.requester_name;
   const iGive = isRequester ? t.offered_skill_title : t.requested_skill_title;
@@ -155,10 +155,12 @@ document.getElementById('skill-form').addEventListener('submit', async (e) => {
   }
 });
 
-if (!getToken()) {
-  window.location.href = '/login.html';
-} else {
+loadSession().then((user) => {
+  if (!user) {
+    window.location.href = '/login.html';
+    return;
+  }
   loadCategories();
   loadMySkills();
   loadTrades();
-}
+});

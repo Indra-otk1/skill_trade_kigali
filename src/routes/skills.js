@@ -1,7 +1,6 @@
-const express = require('express');
-const db = require('../db/database');
-const requireAuth = require('../middleware/auth');
-
+import express from 'express';
+import db from '../db/database.js';
+import requireAuth from '../middleware/auth.js';
 const router = express.Router();
 
 const CATEGORIES = [
@@ -24,7 +23,7 @@ const SKILL_SELECT = `
     (SELECT ROUND(AVG(score), 1) FROM ratings WHERE ratee_id = u.id) AS owner_rating,
     (SELECT COUNT(*) FROM ratings WHERE ratee_id = u.id) AS owner_rating_count
   FROM skills s
-  JOIN users u ON u.id = s.user_id
+  JOIN "user" u ON u.id = s.user_id
 `;
 
 // GET /api/skills?q=guitar&category=Music
@@ -123,4 +122,4 @@ router.delete('/:id', requireAuth, (req, res) => {
   res.json({ message: 'Skill deleted' });
 });
 
-module.exports = router;
+export default router;
